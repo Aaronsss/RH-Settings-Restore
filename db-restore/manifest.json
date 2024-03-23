@@ -1,0 +1,13 @@
+{
+    "name": "Settings Restore",
+    "author": "Aaron Smith",
+    "author_uri": "https://github.com/Aaronsss/",
+    "description": "Restores a default database at server startup",
+    "info_uri": "https://github.com/Aaronsss/RH-Settings-Restore",
+    "license": "RotorHazard",
+    "license_uri": "https://github.com/RotorHazard/RotorHazard/blob/main/LICENSE",
+    "version": "1.0",
+    "required_rhapi_version": "1.0",
+    "update_uri": null,
+    "text_domain": null
+}
