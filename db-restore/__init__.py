@@ -23,13 +23,20 @@ class setting_restore():
 
     def restore_db(self, args):
         self.database_backup()
-        shutil.copy(BackupDatabaseLocation, DatabaseLocation)
-        logging.info("Default database restored!")
+        try:
+            shutil.copy(BackupDatabaseLocation, DatabaseLocation)
+            logging.info("Default database restored!")
+        except:
+            logging.warn("Unable to find / restore default database " + BackupDatabaseLocation)
 
-    def database_backup(self, args):
+    def database_backup(self):
         backup_filename = "./db_bkp/auto_db_backup_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".db"
-        shutil.copy(DatabaseLocation, backup_filename)
-        logging.info("Database backed up to " + backup_filename)
+        try:
+            shutil.copy(DatabaseLocation, backup_filename)
+            logging.info("Database backed up to " + backup_filename)
+        except:
+            logging.warn("Unable to find / restore the database " + DatabaseLocation)
+
 
     def prepare_db(self, args):
         self._rhapi.race.clear()
@@ -42,8 +49,14 @@ class setting_restore():
             self._rhapi.db.raceclasses_reset()
 
         time.sleep(5)
-        shutil.copy(BackupDatabaseLocation, BackupBackupDatabaseLocation)
-        shutil.copy(DatabaseLocation, BackupDatabaseLocation)
+        try:
+            shutil.copy(BackupDatabaseLocation, BackupBackupDatabaseLocation)
+        except:
+            logging.warn("Backup Database does not already exsist " + BackupDatabaseLocation)
+        try:
+            shutil.copy(DatabaseLocation, BackupDatabaseLocation)
+        except:
+            logging.warn("Unable to find / restore the database " + DatabaseLocation)
         print("Database generated")
 
     def set_enabled_state(self, args):
