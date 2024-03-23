@@ -5,7 +5,6 @@ This plugin for [RotorHazard](https://github.com/RotorHazard/RotorHazard) lets y
 Run the following command in the SSH terminal to install the settings restore 
 ```
 cd ~
-wget https://github.com/Aaronsss/RH-sensor-monitor/archive/refs/heads/main.zip
 wget https://github.com/Aaronsss/RH-Settings-Restore/archive/refs/heads/main.zip
 unzip ./main.zip
 mv ~/RH-Settings-Restore/db-restore/ ~/RotorHazard/src/server/plugins/
