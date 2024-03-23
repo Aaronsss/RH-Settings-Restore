@@ -79,10 +79,12 @@ class setting_restore():
             f.write("enabled")
             f.close()
             logger.info("Settings restore file created")
+            self._rhapi.ui.message_notify("Database restore is enabled at startup")
         else:
             if os.path.exists(RestoreSettingFile):
                 os.remove(RestoreSettingFile)
                 logger.info("Settings restore file removed")
+                self._rhapi.ui.message_notify("Database restore is disabled at startup")
 
 def initialize(rhapi):
     restore = setting_restore(rhapi)
