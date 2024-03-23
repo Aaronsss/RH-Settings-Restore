@@ -1,4 +1,4 @@
-# RotorHazard Settings Restore
+# RotorHazard Automatic Database Restore
 This plugin for [RotorHazard](https://github.com/RotorHazard/RotorHazard) lets you restore a default database when the server boots up. This is useful if multiple people use your timer and you want it to be in a known state after someone else has used it.
 
 # How to Install
