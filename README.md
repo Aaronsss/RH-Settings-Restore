@@ -7,8 +7,8 @@ Run the following command in the SSH terminal to install the settings restore
 cd ~
 wget https://github.com/Aaronsss/RH-Settings-Restore/archive/refs/heads/main.zip
 unzip ./main.zip
-mv ~/RH-Settings-Restore/db-restore/ ~/RotorHazard/src/server/plugins/
-rm -R ./RH-Settings-Restore/
+mv ~/RH-Settings-Restore-main/db-restore/ ~/RotorHazard/src/server/plugins/
+rm -R ./RH-Settings-Restore-main/
 rm ./main.zip
 sudo systemctl restart rotorhazard.service
 ```
