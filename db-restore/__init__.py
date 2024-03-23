@@ -22,12 +22,17 @@ class setting_restore():
         self._rhapi = rhapi
 
     def restore_db(self, args):
-        self.database_backup()
         try:
-            shutil.copy(BackupDatabaseLocation, DatabaseLocation)
-            logging.info("Default database restored!")
+            f = open(RestoreSettingFile)
+            f.close()
+            self.database_backup()
+            try:
+                shutil.copy(BackupDatabaseLocation, DatabaseLocation)
+                logging.info("Default database restored!")
+            except:
+                logging.warn("Unable to find / restore default database " + BackupDatabaseLocation)
         except:
-            logging.warn("Unable to find / restore default database " + BackupDatabaseLocation)
+            pass
 
     def database_backup(self):
         backup_filename = "./db_bkp/auto_db_backup_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".db"
@@ -39,25 +44,33 @@ class setting_restore():
 
 
     def prepare_db(self, args):
+        self._rhapi.ui.message_notify("Database backup started, please wait for confirmation before leaving the page!")
         self._rhapi.race.clear()
         self.database_backup()    
         if self._rhapi.db.option("restore_clear_races") == '1':
             self._rhapi.db.races_clear()
+            while (len(self._rhapi.db.races) != 0):
+                pass
         if self._rhapi.db.option("restore_clear_heats") == '1':
             self._rhapi.db.heats_reset()
+            while (len(self._rhapi.db.heats) != 0):
+                pass
         if self._rhapi.db.option("restore_clear_classes") == '1':
             self._rhapi.db.raceclasses_reset()
+            while (len(self._rhapi.db.raceclasses) != 0):
+                pass
 
-        time.sleep(5)
+        time.sleep(1)
         try:
             shutil.copy(BackupDatabaseLocation, BackupBackupDatabaseLocation)
         except:
             logging.warn("Backup Database does not already exsist " + BackupDatabaseLocation)
         try:
             shutil.copy(DatabaseLocation, BackupDatabaseLocation)
+            self._rhapi.ui.message_notify("Default startup database updated")
         except:
             logging.warn("Unable to find / restore the database " + DatabaseLocation)
-        print("Database generated")
+        print("Database back up complete")
 
     def set_enabled_state(self, args):
         enabled_state = self._rhapi.db.option("restore_enabled_state")
