@@ -23,14 +23,24 @@ class setting_restore():
 
     def restore_db(self, args):
         try:
-            f = open(RestoreSettingFile)
-            f.close()
-            self.database_backup()
-            try:
-                shutil.copy(BackupDatabaseLocation, DatabaseLocation)
-                logging.info("Default database restored!")
-            except:
-                logging.warn("Unable to find / restore default database " + BackupDatabaseLocation)
+            with open(RestoreSettingFile, 'r') as file:
+                data = file.readlines()
+
+            if time.time() > float(data[2]):
+                self.database_backup()
+                try:
+                    shutil.copy(BackupDatabaseLocation, DatabaseLocation)
+                    logging.info("Default database restored!")
+                except:
+                    logging.warn("Unable to find / restore default database " + BackupDatabaseLocation)
+            else:
+                logging.info("Default database not restored - time since last boot not great enough!")
+
+            data[2] = str(time.time() + float(data[1])) + '\n'
+
+            with open(RestoreSettingFile, 'w') as file:
+                file.writelines( data )
+            file.close()
         except:
             pass
 
@@ -74,9 +84,11 @@ class setting_restore():
 
     def set_enabled_state(self, args):
         enabled_state = self._rhapi.db.option("restore_enabled_state")
+        restore_wait_time = self._rhapi.db.option("restore_wait_time")
         if enabled_state == '1':
-            f = open(RestoreSettingFile, "w")
-            f.write("enabled")
+            data = ["enabled\n", str(int(restore_wait_time) * 60) + '\n', str(time.time() + (float(restore_wait_time) * 60)) + '\n']
+            with open(RestoreSettingFile, 'w') as f:
+                f.writelines( data )
             f.close()
             logger.info("Settings restore file created")
             self._rhapi.ui.message_notify("Database restore is enabled at startup")
@@ -86,6 +98,21 @@ class setting_restore():
                 logger.info("Settings restore file removed")
                 self._rhapi.ui.message_notify("Database restore is disabled at startup")
 
+    def get_file_settins(self):
+        settings = {
+        "enabled": 0,
+        "wait_time": 0
+        }
+        try:
+            with open(RestoreSettingFile, 'r') as file:
+                data = file.readlines()
+            if data[0] == "enabled\n":
+                settings["enabled"] = 1
+            settings["wait_time"] = int(int(data[1]) / 60)
+        except:
+            pass
+        return settings
+
 def initialize(rhapi):
     restore = setting_restore(rhapi)
     rhapi.ui.register_panel('setting_restore', 'Settings Restore', 'settings', order=0)
@@ -93,5 +120,7 @@ def initialize(rhapi):
     rhapi.fields.register_option(UIField('restore_clear_heats', 'Clear Heats', UIFieldType.CHECKBOX), 'setting_restore')
     rhapi.fields.register_option(UIField('restore_clear_classes', 'Clear Classes', UIFieldType.CHECKBOX), 'setting_restore')
     rhapi.ui.register_quickbutton('setting_restore', 'Prepare_db', 'Update Default Database', restore.prepare_db)
-    rhapi.fields.register_option(UIField('restore_enabled_state', 'Enabled', UIFieldType.CHECKBOX, 0, 'Enable the settings restore at boot up (make sure to click save)'), 'setting_restore')
-    rhapi.ui.register_quickbutton('setting_restore', 'save_settings', 'Save Enabled State', restore.set_enabled_state)
+    settings = restore.get_file_settins()
+    rhapi.fields.register_option(UIField('restore_wait_time', 'Restore Wait Time', UIFieldType.TEXT, str(settings["wait_time"]), 'Time in mins that must be exceeded since last boot to reset the database (make sure to click save)'), 'setting_restore')
+    rhapi.fields.register_option(UIField('restore_enabled_state', 'Enabled', UIFieldType.CHECKBOX, settings["enabled"], 'Enable the settings restore at boot up (make sure to click save)'), 'setting_restore')
+    rhapi.ui.register_quickbutton('setting_restore', 'save_settings', 'Save', restore.set_enabled_state)
