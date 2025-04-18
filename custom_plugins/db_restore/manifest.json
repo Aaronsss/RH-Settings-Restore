@@ -2,9 +2,9 @@
     "domain": "db_restore",
     "name": "Settings Restore",
     "author": "Aaron Smith",
-    "license": "MIT",
+    "author_uri": "https://github.com/Aaronsss",
     "description": "Restores a default configuration at server startup",
-    "info_uri": "https://github.com/Aaronsss/RH-Settings-Restore",
+    "documentation_uri": "https://github.com/Aaronsss/RH-Settings-Restore",
     "required_rhapi_version": "1.1",
     "version": "1.2.0",
     "category": ["Utilities"]
