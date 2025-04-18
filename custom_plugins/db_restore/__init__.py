@@ -11,46 +11,57 @@ from eventmanager import Evt
 from EventActions import ActionEffect
 from RHUI import UIField, UIFieldType, UIFieldSelectOption
 
-RestoreSettingFile = "./plugins/db-restore/settings.txt"
-DatabaseLocation = "./database.db"
-BackupDatabaseLocation = "./plugins/db-restore/default_settings.db"
-BackupBackupDatabaseLocation = "./plugins/db-restore/default_settings.old"
 
 class setting_restore():
     def __init__(self, rhapi):
-        self.restore_db(self)
         self._rhapi = rhapi
+        if (self._rhapi.API_VERSION_MAJOR <= 1 and self._rhapi.API_VERSION_MINOR <= 2):
+            self.user_data_location = "."
+        else:
+            self.user_data_location = self._rhapi.server.data_dir
+
+        self.RestoreSettingFile = self.user_data_location + "/plugins/db_restore/settings.txt"
+        self.DatabaseLocation = self.user_data_location + "/database.db"
+        self.BackupDatabaseLocation = self.user_data_location + "/plugins/db_restore/default_settings.db"
+        self.BackupBackupDatabaseLocation = self.user_data_location + "/plugins/db_restore/default_settings.old"
+        self.DbBackupDir = self.user_data_location + "/db_bkp"
+
+        if not os.path.exists(self.DbBackupDir):
+            os.makedirs(self.DbBackupDir)
+            logging.info(f"Created directory: {self.DbBackupDir}")
+            
+        self.restore_db(self)
 
     def restore_db(self, args):
         try:
-            with open(RestoreSettingFile, 'r') as file:
+            with open(self.RestoreSettingFile, 'r') as file:
                 data = file.readlines()
 
             if time.time() > float(data[2]):
                 self.database_backup()
                 try:
-                    shutil.copy(BackupDatabaseLocation, DatabaseLocation)
+                    shutil.copy(self.BackupDatabaseLocation, self.DatabaseLocation)
                     logging.info("Default database restored!")
                 except:
-                    logging.warn("Unable to find / restore default database " + BackupDatabaseLocation)
+                    logging.warn("Unable to find / restore default database " + self.BackupDatabaseLocation)
             else:
                 logging.info("Default database not restored - time since last boot not great enough!")
 
             data[2] = str(time.time() + float(data[1])) + '\n'
 
-            with open(RestoreSettingFile, 'w') as file:
+            with open(self.RestoreSettingFile, 'w') as file:
                 file.writelines( data )
             file.close()
         except:
             pass
 
     def database_backup(self):
-        backup_filename = "./db_bkp/auto_db_backup_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".db"
+        backup_filename = self.DbBackupDir + "/auto_db_backup_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".db"
         try:
-            shutil.copy(DatabaseLocation, backup_filename)
+            shutil.copy(self.DatabaseLocation, backup_filename)
             logging.info("Database backed up to " + backup_filename)
         except:
-            logging.warn("Unable to find / restore the database " + DatabaseLocation)
+            logging.warn("Unable to backup the database " + self.DatabaseLocation)
 
 
     def prepare_db(self, args):
@@ -72,14 +83,14 @@ class setting_restore():
 
         time.sleep(1)
         try:
-            shutil.copy(BackupDatabaseLocation, BackupBackupDatabaseLocation)
+            shutil.copy(self.BackupDatabaseLocation, self.BackupBackupDatabaseLocation)
         except:
-            logging.warn("Backup Database does not already exsist " + BackupDatabaseLocation)
+            logging.warn("Backup Database does not already exsist " + self.BackupDatabaseLocation)
         try:
-            shutil.copy(DatabaseLocation, BackupDatabaseLocation)
+            shutil.copy(self.DatabaseLocation, self.BackupDatabaseLocation)
             self._rhapi.ui.message_notify("Default startup database updated")
         except:
-            logging.warn("Unable to find / restore the database " + DatabaseLocation)
+            logging.warn("Unable to find / restore the database " + self.DatabaseLocation)
         print("Database back up complete")
 
     def set_enabled_state(self, args):
@@ -87,14 +98,14 @@ class setting_restore():
         restore_wait_time = self._rhapi.db.option("restore_wait_time")
         if enabled_state == '1':
             data = ["enabled\n", str(int(restore_wait_time) * 60) + '\n', str(time.time() + (float(restore_wait_time) * 60)) + '\n']
-            with open(RestoreSettingFile, 'w') as f:
+            with open(self.RestoreSettingFile, 'w') as f:
                 f.writelines( data )
             f.close()
             logger.info("Settings restore file created")
             self._rhapi.ui.message_notify("Database restore is enabled at startup")
         else:
-            if os.path.exists(RestoreSettingFile):
-                os.remove(RestoreSettingFile)
+            if os.path.exists(self.RestoreSettingFile):
+                os.remove(self.RestoreSettingFile)
                 logger.info("Settings restore file removed")
                 self._rhapi.ui.message_notify("Database restore is disabled at startup")
 
@@ -104,7 +115,7 @@ class setting_restore():
         "wait_time": 0
         }
         try:
-            with open(RestoreSettingFile, 'r') as file:
+            with open(self.RestoreSettingFile, 'r') as file:
                 data = file.readlines()
             if data[0] == "enabled\n":
                 settings["enabled"] = 1
