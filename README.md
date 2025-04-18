@@ -8,13 +8,14 @@ cd ~
 wget https://github.com/Aaronsss/RH-Settings-Restore/archive/refs/heads/main.zip
 unzip ./main.zip
 rm -R ~/RotorHazard/src/server/plugins/db-restore
-mv ~/RH-Settings-Restore-main/db-restore/ ~/RotorHazard/src/server/plugins/
+rm -R ~/RotorHazard/src/server/plugins/db_restore
+mv ~/RH-Settings-Restore-main/custom_plugins/db_restore/ ~/RotorHazard/src/server/plugins/
 rm -R ./RH-Settings-Restore-main/
 rm ./main.zip
 sudo systemctl restart rotorhazard.service
 ```
 
-If you wish to install manually, place the db-restore folder within the RotorHazard plugins folder Rotorhazard/src/server/plugins then start / restart the server  
+If you wish to install manually, place the custom_plugins/db_restore folder within the RotorHazard plugins folder Rotorhazard/src/server/plugins then start / restart the server  
 
 # How to setup
 
