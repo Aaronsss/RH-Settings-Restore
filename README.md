@@ -3,10 +3,10 @@ This plugin for [RotorHazard](https://github.com/RotorHazard/RotorHazard) lets y
 
 # How to Install
 There are 3 ways you can install this plugin
-1. Though RotorHazards community plugin manager on RotorHazard 4.3.0 or greater:
-   This can be found on your timer which must be connected to the internet by going to settings -> plugins -> Browse Community Plugins (online only) -> Utilities then install the Settings Restore plugin
+1. Though RotorHazards community plugin manager on RotorHazard 4.3.0 or greater:  
+   This can be found on your timer which must be connected to the internet by going to settings -> plugins -> Browse Community Plugins (online only) -> Utilities then install the Settings Restore plugin  
    
-2. Paste the following commands into your timers SSH terminal:
+2. Paste the following commands into your timers SSH terminal:  
   You can also paste the below command into your command line to instal the plugin (your timer will need an internet connection)  
   ```
   cd ~
@@ -19,7 +19,7 @@ There are 3 ways you can install this plugin
   rm ./main.zip
   sudo systemctl restart rotorhazard.service
   ```
-3. Manually:
+3. Manually:  
   If you wish to install manually, place the custom_plugins/db_restore folder within the RotorHazard plugins folder Rotorhazard/src/server/plugins then start / restart the server  
 
 # How to setup
